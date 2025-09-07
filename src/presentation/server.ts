@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/suspicious/noConsole: Console is Debugging port  */
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import express from "express";
@@ -5,27 +6,41 @@ import express from "express";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-export class Server {
-  private app = express();
+const NON_API_ROUTES_REGEX = /^\/(?!api).*/;
 
-  async start() {
+type Options = {
+  port: number;
+  publicPath: string;
+};
+
+export class Server {
+  private readonly app = express();
+  private readonly port: number;
+  private readonly publicPath: string;
+
+  constructor(options: Options) {
+    this.port = options.port;
+    this.publicPath = options.publicPath;
+  }
+
+  start() {
     // Middlewares
-    // ...
 
     // Public Folder
-    this.app.use(express.static("public"));
+    this.app.use(express.static(this.publicPath));
 
     // Routes
     this.app.get("/api/health", (_req, res) => {
       res.json({ status: "ok" });
-    });
-
-    this.app.get(/^\/(?!api).*/, (_req, res) => {
       res.sendFile(path.join(__dirname, "../../public/index.html"));
     });
 
-    this.app.listen(3000, () => {
-      console.log(`Server is running on port ${3000}`);
+    this.app.get(NON_API_ROUTES_REGEX, (_req, res) => {
+      res.sendFile(path.join(__dirname, "../../public/index.html"));
+    });
+
+    this.app.listen(this.port, () => {
+      console.log(`Server listening on port ${this.port}`);
     });
   }
 }
