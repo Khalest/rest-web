@@ -1,4 +1,5 @@
 import { envs, ShowErrors } from "./envs";
+import { AppRoutes } from "./presentation/routes";
 import { Server } from "./presentation/server";
 
 (() => {
@@ -6,8 +7,11 @@ import { Server } from "./presentation/server";
 })();
 
 function main() {
-  // Validate Envs
   ShowErrors();
-  const server = new Server({ port: envs.PORT, publicPath: envs.PUBLIC_PATH });
+  const server = new Server({
+    port: envs.PORT,
+    router: AppRoutes.routes,
+    publicPath: envs.PUBLIC_PATH,
+  });
   server.start();
 }
