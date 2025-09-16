@@ -9,7 +9,7 @@ const todos = [
   {
     id: 1,
     title: "Sample Todo",
-    createdAt: "2024-06-01T12:00:00Z",
+    completedAt: "2024-06-01T12:00:00Z",
   },
 ];
 
@@ -44,11 +44,48 @@ export class TodosController {
     todos.push({
       id: todos.length + 1,
       title: text,
-      createdAt: new Date().toISOString(),
+      completedAt: new Date().toISOString(),
     });
 
     res
       .status(HTTP_STATUS_CREATED)
       .json({ message: "Todo created successfully" });
+  };
+
+  updateTodo = (req: Request, res: Response) => {
+    const { id } = req.params;
+    const { text } = req.body;
+    const todoIndex = todos.findIndex((t) => t.id === Number(id));
+    if (todoIndex === -1) {
+      return res
+        .status(HTTP_STATUS_NOT_FOUND)
+        .json({ message: "Todo not found" });
+    }
+    if (!text) {
+      return res
+        .status(HTTP_STATUS_BAD_REQUEST)
+        .json({ message: "Text is required" });
+    }
+    const todo = todos[todoIndex];
+    if (todo) {
+      todo.title = text;
+      return res.status(HTTP_STATUS_OK).json(todo);
+    }
+    return res
+      .status(HTTP_STATUS_NOT_FOUND)
+      .json({ message: "Todo not found" });
+  };
+
+  deleteTodo = (req: Request, res: Response) => {
+    const { id } = req.params;
+    const todoIndex = todos.findIndex((t) => t.id === Number(id));
+    if (todoIndex === -1) {
+      return res
+        .status(HTTP_STATUS_NOT_FOUND)
+        .json({ message: "Todo not found" });
+    }
+    const todo = todos[todoIndex];
+    todos.splice(todoIndex, 1);
+    return res.status(HTTP_STATUS_OK).json({ todo, message: "Todo deleted" });
   };
 }
