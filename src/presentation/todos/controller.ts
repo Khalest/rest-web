@@ -1,5 +1,10 @@
 import type { Request, Response } from "express";
 
+const HTTP_STATUS_NOT_FOUND = 404;
+const HTTP_STATUS_OK = 200;
+const HTTP_STATUS_CREATED = 201;
+const HTTP_STATUS_BAD_REQUEST = 400;
+
 const todos = [
   {
     id: 1,
@@ -10,9 +15,9 @@ const todos = [
 
 export class TodosController {
   // Dependency injections would go here
-  constructor() {}
+  // constructor() {}
 
-  getTodos = (req: Request, res: Response) => {
+  getTodos = (_req: Request, res: Response) => {
     return res.json(todos);
   };
 
@@ -20,8 +25,30 @@ export class TodosController {
     const { id } = req.params;
     const todo = todos.find((t) => t.id === Number(id));
     if (!todo) {
-      return res.status(404).json({ message: "Todo not found" });
+      return res
+        .status(HTTP_STATUS_NOT_FOUND)
+        .json({ message: "Todo not found" });
     }
-    return res.json(todo);
+    return res.status(HTTP_STATUS_OK).json(todo);
+  };
+
+  createTodo = (req: Request, res: Response) => {
+    const { text } = req.body;
+
+    if (!text) {
+      return res
+        .status(HTTP_STATUS_BAD_REQUEST)
+        .json({ message: "Text is required" });
+    }
+
+    todos.push({
+      id: todos.length + 1,
+      title: text,
+      createdAt: new Date().toISOString(),
+    });
+
+    res
+      .status(HTTP_STATUS_CREATED)
+      .json({ message: "Todo created successfully" });
   };
 }
