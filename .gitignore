@@ -3,3 +3,7 @@ dist/
 .env
 bun.lock
 package-lock.json
+
+postgres/
+
+/src/generated/prisma
