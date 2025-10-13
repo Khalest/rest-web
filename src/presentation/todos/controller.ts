@@ -6,25 +6,23 @@ const HTTP_STATUS_OK = 200;
 const HTTP_STATUS_CREATED = 201;
 const HTTP_STATUS_BAD_REQUEST = 400;
 
-const todos = [
-  {
-    id: 1,
-    text: "Sample Todo",
-    completedAt: "2024-06-01T12:00:00Z",
-  },
-];
-
 export class TodosController {
   // Dependency injections would go here
   // constructor() {}
 
-  getTodos = (_req: Request, res: Response) => {
+  getTodos = async (_req: Request, res: Response) => {
+    const todos = await prisma.todo.findMany();
     return res.json(todos);
   };
 
-  getTodoById = (req: Request, res: Response) => {
+  getTodoById = async (req: Request, res: Response) => {
     const { id } = req.params;
-    const todo = todos.find((t) => t.id === Number(id));
+    if (!id)
+      return res
+        .status(HTTP_STATUS_BAD_REQUEST)
+        .json({ message: "Id is required" });
+
+    const todo = await prisma.todo.findFirst({ where: { id: Number(id) } });
     if (!todo) {
       return res
         .status(HTTP_STATUS_NOT_FOUND)
@@ -47,21 +45,19 @@ export class TodosController {
     res.status(HTTP_STATUS_CREATED).json(todo);
   };
 
-  updateTodo = (req: Request, res: Response) => {
+  updateTodo = async (req: Request, res: Response) => {
     const { id } = req.params;
     const { text } = req.body;
-    const todoIndex = todos.findIndex((t) => t.id === Number(id));
-    if (todoIndex === -1) {
-      return res
-        .status(HTTP_STATUS_NOT_FOUND)
-        .json({ message: "Todo not found" });
-    }
+    // const todoIndex = todos.findIndex((t) => t.id === Number(id));
+    const todo = await prisma.todo.findFirst({
+      where: { id: Number(id) },
+    });
     if (!text) {
       return res
         .status(HTTP_STATUS_BAD_REQUEST)
         .json({ message: "Text is required" });
     }
-    const todo = todos[todoIndex];
+
     if (todo) {
       todo.text = text;
       return res.status(HTTP_STATUS_OK).json(todo);
@@ -71,16 +67,17 @@ export class TodosController {
       .json({ message: "Todo not found" });
   };
 
-  deleteTodo = (req: Request, res: Response) => {
+  deleteTodo = async (req: Request, res: Response) => {
     const { id } = req.params;
-    const todoIndex = todos.findIndex((t) => t.id === Number(id));
-    if (todoIndex === -1) {
+    const todo = await prisma.todo.findFirst({
+      where: { id: Number(id) },
+    });
+    if (!todo) {
       return res
         .status(HTTP_STATUS_NOT_FOUND)
         .json({ message: "Todo not found" });
     }
-    const todo = todos[todoIndex];
-    todos.splice(todoIndex, 1);
+    await prisma.todo.delete({ where: { id: Number(id) } });
     return res.status(HTTP_STATUS_OK).json({ todo, message: "Todo deleted" });
   };
 }
