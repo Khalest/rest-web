@@ -26,26 +26,25 @@ export class TodosController {
     const { id } = req.params;
     const todo = todos.find((t) => t.id === Number(id));
     if (!todo) {
-      return res.status(HTTP_STATUS_NOT_FOUND).json({ message: "Todo not found" });
+      return res
+        .status(HTTP_STATUS_NOT_FOUND)
+        .json({ message: "Todo not found" });
     }
     return res.status(HTTP_STATUS_OK).json(todo);
   };
 
-  createTodo = (req: Request, res: Response) => {
+  createTodo = async (req: Request, res: Response) => {
     const { text } = req.body;
-    if (!text) return res.status(HTTP_STATUS_BAD_REQUEST).json({ message: "Text is required" });
+    if (!text)
+      return res
+        .status(HTTP_STATUS_BAD_REQUEST)
+        .json({ message: "Text is required" });
 
-    prisma.todo.create({
+    const todo = await prisma.todo.create({
       data: { text },
     });
 
-    todos.push({
-      id: todos.length + 1,
-      text: text,
-      completedAt: new Date().toISOString(),
-    });
-
-    res.status(HTTP_STATUS_CREATED).json({ message: "Todo created successfully" });
+    res.status(HTTP_STATUS_CREATED).json(todo);
   };
 
   updateTodo = (req: Request, res: Response) => {
@@ -53,24 +52,32 @@ export class TodosController {
     const { text } = req.body;
     const todoIndex = todos.findIndex((t) => t.id === Number(id));
     if (todoIndex === -1) {
-      return res.status(HTTP_STATUS_NOT_FOUND).json({ message: "Todo not found" });
+      return res
+        .status(HTTP_STATUS_NOT_FOUND)
+        .json({ message: "Todo not found" });
     }
     if (!text) {
-      return res.status(HTTP_STATUS_BAD_REQUEST).json({ message: "Text is required" });
+      return res
+        .status(HTTP_STATUS_BAD_REQUEST)
+        .json({ message: "Text is required" });
     }
     const todo = todos[todoIndex];
     if (todo) {
       todo.text = text;
       return res.status(HTTP_STATUS_OK).json(todo);
     }
-    return res.status(HTTP_STATUS_NOT_FOUND).json({ message: "Todo not found" });
+    return res
+      .status(HTTP_STATUS_NOT_FOUND)
+      .json({ message: "Todo not found" });
   };
 
   deleteTodo = (req: Request, res: Response) => {
     const { id } = req.params;
     const todoIndex = todos.findIndex((t) => t.id === Number(id));
     if (todoIndex === -1) {
-      return res.status(HTTP_STATUS_NOT_FOUND).json({ message: "Todo not found" });
+      return res
+        .status(HTTP_STATUS_NOT_FOUND)
+        .json({ message: "Todo not found" });
     }
     const todo = todos[todoIndex];
     todos.splice(todoIndex, 1);
