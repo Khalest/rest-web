@@ -1,0 +1,28 @@
+@baseUrl = http://localhost:3000/api/todos
+@todoId = 1
+
+### Listar todos los todos
+GET {{baseUrl}}
+
+### Obtener un todo por id (ID actual: {{todoId}})
+GET {{baseUrl}}/{{todoId}}
+
+### Crear un nuevo todo (texto: "Comprar leche")
+POST {{baseUrl}}
+Content-Type: application/json
+
+{
+	"text": "Comprar leche"
+}
+
+### Actualizar un todo existente (nuevo texto: "Comprar huevos")
+PUT {{baseUrl}}/{{todoId}}
+Content-Type: application/json
+
+{
+	"text": "Comprar huevos"
+}
+
+### Eliminar un todo
+DELETE {{baseUrl}}/{{todoId}}
+
